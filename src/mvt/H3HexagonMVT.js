@@ -26,7 +26,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
   const [nextColor, setNextColor] = useState(0);
   const location = useLocation();
   const [initialViewState, setInitialViewState] = useState({
-    ...locations.yyj,
+    ...locations.world,
     maxZoom: 20,
     minZoom: 1,
   });
@@ -71,7 +71,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
 
   useEffect(() => {
     const initialViewState = {
-      ...locations.yyj,
+      ...locations.world,
       transitionInterpolator: new FlyToInterpolator({
         speed: 1.5,
       }),
