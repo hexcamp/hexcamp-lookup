@@ -1,7 +1,7 @@
 {
-  "name": "hexcamp-simple-map",
+  "name": "hexcamp-lookup",
   "version": "0.0.1",
-  "description": "Displays hexagons with *.hex.camp links",
+  "description": "Find a hexagon on the map given an ID",
   "private": true,
   "author": "Jim Pick (@jimpick)",
   "license": "(Apache-2.0 AND MIT)",

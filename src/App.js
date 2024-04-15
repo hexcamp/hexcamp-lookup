@@ -32,9 +32,6 @@ const router = (homeLinkCounter, setHomeLinkCounter) =>
                   Home
                 </NavLink>
               </StyledItem>
-              <StyledItem>
-                <NavLink to='/edit'>Edit</NavLink>
-              </StyledItem>
             </StyledList>
           </nav>
           <>
@@ -45,10 +42,6 @@ const router = (homeLinkCounter, setHomeLinkCounter) =>
       children: [
         {
           path: '/',
-          element: <MVTExample homeLinkCounter={homeLinkCounter} />
-        },
-        {
-          path: 'edit',
           element: <MVTExample />
         }
       ]
