@@ -29,7 +29,7 @@ const router = (homeLinkCounter, setHomeLinkCounter) =>
                   to='/'
                   onClick={() => setHomeLinkCounter(homeLinkCounter + 1)}
                 >
-                  Home
+                  Hex.Camp Encoded Hexagon ID Lookup Tool
                 </NavLink>
               </StyledItem>
             </StyledList>

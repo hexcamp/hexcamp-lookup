@@ -11,6 +11,7 @@ mkdir -p tmp
 npm run build
 DIR=build
 
+
 echo Adding to IPFS...
 (
 	set +e
@@ -24,6 +25,11 @@ echo Adding to IPFS...
 )
 export CID=$(cat ./tmp/cid.txt)
 echo CID $CID
+
+echo Checking if local IPFS is running
+
+ipfs swarm connect /ip4/185.246.85.37/tcp/4001/p2p/12D3KooW9xuJVGEV83LqpPtBR88J98jFGqZW9ENbNBn9Cp4MzUwn/p2p-circuit/p2p/12D3KooWRuWQMdoxXFwPP9qFNrp3xNkfWCb9pbnS62xzBkRvd67n
+ipfs ping 12D3KooWRuWQMdoxXFwPP9qFNrp3xNkfWCb9pbnS62xzBkRvd67n --count 1
 
 echo Pinning to IPFS Cluster...
 
@@ -62,6 +68,7 @@ HOSTED_ZONE_ID=Z0776169RPXDLRHZOI9Q
 echo Hex: $HEX CID: $CID
 
 if [ ! -f "PUBLISHED" ]; then
+
 # Create
 JSON="$(cat <<EOF
     {
@@ -96,8 +103,11 @@ JSON="$(cat <<EOF
     }
 EOF
 )"
+
 else
-# Update 
+
+# Update
+
 JSON="$(cat <<EOF
     {
       "Changes": [
@@ -118,10 +128,42 @@ JSON="$(cat <<EOF
     }
 EOF
 )"
+
 fi
+
+echo $JSON
+
+aws route53 change-resource-record-sets \
+  --hosted-zone-id $HOSTED_ZONE_ID \
+  --change-batch "$JSON" | cat
+
+# Update hex.camp link
+
+JSON="$(cat <<EOF
+    {
+      "Changes": [
+        {
+          "Action": "UPSERT",
+          "ResourceRecordSet": {
+            "Name": "_dnslink.hex.camp",
+            "Type": "TXT",
+            "TTL": 30,
+            "ResourceRecords": [
+              {
+                "Value": "\"dnslink=/ipfs/$CID\""
+              }
+            ]
+          }
+        }
+      ]
+    }
+EOF
+)"
 echo $JSON
 aws route53 change-resource-record-sets \
   --hosted-zone-id $HOSTED_ZONE_ID \
-  --change-batch "$JSON"
+  --change-batch "$JSON" | cat
+
+
 touch PUBLISHED
 
