@@ -137,33 +137,6 @@ aws route53 change-resource-record-sets \
   --hosted-zone-id $HOSTED_ZONE_ID \
   --change-batch "$JSON" | cat
 
-# Update hex.camp link
-
-JSON="$(cat <<EOF
-    {
-      "Changes": [
-        {
-          "Action": "UPSERT",
-          "ResourceRecordSet": {
-            "Name": "_dnslink.hex.camp",
-            "Type": "TXT",
-            "TTL": 30,
-            "ResourceRecords": [
-              {
-                "Value": "\"dnslink=/ipfs/$CID\""
-              }
-            ]
-          }
-        }
-      ]
-    }
-EOF
-)"
-echo $JSON
-aws route53 change-resource-record-sets \
-  --hosted-zone-id $HOSTED_ZONE_ID \
-  --change-batch "$JSON" | cat
-
 
 touch PUBLISHED
 
