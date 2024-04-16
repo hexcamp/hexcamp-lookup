@@ -10,7 +10,6 @@ import H3HexagonView from "./h3-hexagon-view";
 import ResolutionSelect from "./resolution-select";
 import LocationPicker from "./location-picker";
 import getPeerIdFromH3HexAndSecret from "./deterministic-peer-id";
-import WebRTCPanel from "./webrtc-panel";
 import listenersReducer from "./listeners-reducer";
 
 // var array = new Uint8Array(64); crypto.getRandomValues(array)
@@ -38,20 +37,6 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
     () => (selectedHex ? hexToUrl(selectedHex[1]) : ""),
     [selectedHex]
   );
-  const [peerId, setPeerId] = useState();
-  useEffect(() => {
-    setPeerId(null);
-    if (selectedHex) {
-      async function run() {
-        const peerId = await getPeerIdFromH3HexAndSecret(
-          selectedHex[1],
-          secretHex
-        );
-        setPeerId(peerId);
-      }
-      run();
-    }
-  }, [selectedHex]);
 
   useEffect(() => {
     const key = location.search.replace("?loc=", "");
@@ -170,7 +155,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
             console.log("Jim", queryHex);
             const hex = urlToHex(queryHex);
             addHex(hex);
-            pickHex('solid', hex);
+            pickHex("solid", hex);
           }}
         >
           Find Hex
@@ -208,8 +193,6 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
           <h3>Selected</h3>
           {selectedHex && (
             <>
-              <div>Type: {dataIndex.get(selectedHex[1]).type}</div>
-              <div>Label: {dataIndex.get(selectedHex[1]).label}</div>
               <div>
                 Hex: {selectedHex[1]} {selectedHex[0]}
               </div>
@@ -219,9 +202,6 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
                 <a href={`https://${selectedHexBase32}.hex.camp`}>
                   {selectedHexBase32}.hex.camp
                 </a>
-              </div>
-              <div style={{ fontSize: "small" }}>
-                PeerID: {peerId && peerId.toB58String()}
               </div>
               <div>
                 <button
@@ -234,13 +214,6 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
                 </button>
                 <button onClick={() => setSelectedHex(null)}>Deselect</button>
               </div>
-              {peerId && (
-                <WebRTCPanel
-                  peerId={peerId}
-                  listeners={listeners}
-                  dispatchListenersAction={dispatchListenersAction}
-                />
-              )}
             </>
           )}
           <h3>Data</h3>
@@ -258,20 +231,12 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
           </details>
         </div>
       </div>
-      {location.pathname === "/" && (
-        <div style={{ padding: "0.5rem" }}>
-          {selectedHex ? (
-            <>
-              {dataIndex.get(selectedHex[1]).type}:
-              <a href={`https://${selectedHexBase32}.hex.camp`}>
-                {dataIndex.get(selectedHex[1]).label}
-              </a>
-            </>
-          ) : (
-            <span>No hexagon selected.</span>
-          )}
-        </div>
-      )}
+      <div>
+        GitHub:{" "}
+        <a href="https://github.com/hexcamp/hexcamp-lookup">
+          hexcamp/hexcamp-lookup
+        </a>
+      </div>
     </div>
   );
 
