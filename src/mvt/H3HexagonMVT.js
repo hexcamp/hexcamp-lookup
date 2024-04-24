@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useMemo } from "react";
 import { FlyToInterpolator } from "@deck.gl/core";
-import { geoToH3 } from "h3-js";
+import { geoToH3, h3GetBaseCell, h3GetResolution, h3IndexToSplitLong } from "h3-js";
 import produce from "immer";
 import { useLocation } from "react-router-dom";
 import hexToUrl from "./hex-to-url";
@@ -37,6 +37,71 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
     () => (selectedHex ? hexToUrl(selectedHex[1]) : ""),
     [selectedHex]
   );
+
+  const selectedHexH3BaseCell = useMemo(
+    () => {
+      if (!selectedHex) return null
+      return h3GetBaseCell(selectedHex[1])
+    },
+    [selectedHex]
+  );
+
+  const selectedHexH3Resolution = useMemo(
+    () => {
+      if (!selectedHex) return null
+      return h3GetResolution(selectedHex[1])
+    },
+    [selectedHex]
+  );
+
+  const selectedHexH3Digits = useMemo(
+    () => {
+      if (!selectedHex) return null
+      const [lower, upper] = h3IndexToSplitLong(selectedHex[1]);
+      const digits = [];
+      for (let i = 1; i <= selectedHexH3Resolution; i++) {
+        digits.push(
+          getIndexDigit(lower, upper, i)
+        )
+      }
+      return digits;
+    },
+    [selectedHex, selectedHexH3Resolution]
+  );
+
+  const selectedHexCNAME = useMemo(
+    () => {
+      if (!selectedHex) return null
+      let name = `${selectedHexH3BaseCell}.h3.hex.camp`
+      for (const digit of selectedHexH3Digits) {
+        name = `${digit}.${name}`
+      }
+      return name;
+    },
+    [selectedHex, selectedHexH3BaseCell, selectedHexH3Digits]
+  );
+
+  // From https://observablehq.com/@nrabinowitz/h3-index-bit-layout?collection=@nrabinowitz/h3
+  function getIndexDigit(lower, upper, res) {
+    const H3_PER_DIGIT_OFFSET = 3;
+    const H3_DIGIT_MASK = 7;
+    const MAX_H3_RES = 15;
+    const UPPER_RES_OFFSET = 11;
+    const UPPER_SPLIT_RES = 1;
+    const LOWER_SPLIT_RES = H3_PER_DIGIT_OFFSET - UPPER_SPLIT_RES;
+    // res < 5 is in the upper bits, with a one-bit offset
+    if (res < 5) {
+      return (upper >> UPPER_SPLIT_RES + (
+        (MAX_H3_RES - UPPER_RES_OFFSET - res) * H3_PER_DIGIT_OFFSET
+      )) & H3_DIGIT_MASK;
+    }
+    // res > 5 is in the lower bits
+    if (res > 5) {
+      return (lower >> ((MAX_H3_RES - res) * H3_PER_DIGIT_OFFSET)) & H3_DIGIT_MASK;
+    }
+    // res 5 is annoyingly split across upper and lower
+    return ((upper & 1) << 2) + (lower >>> 30); 
+  }
 
   useEffect(() => {
     const key = location.search.replace("?loc=", "");
@@ -196,6 +261,10 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
               <div>
                 Hex: {selectedHex[1]} {selectedHex[0]}
               </div>
+              <div><a href="https://observablehq.com/@nrabinowitz/h3-index-bit-layout?collection=@nrabinowitz/h3">H3 Index Layout</a></div>
+              <div>H3 Resolution: {selectedHexH3Resolution}</div>
+              <div>H3 Base Cell: {selectedHexH3BaseCell}</div>
+              <div>H3 Digits: {selectedHexH3Digits && selectedHexH3Digits.join(', ')}</div>
               <div>Base32: {selectedHexBase32}</div>
               <div>
                 Hex.Camp URL:{" "}
@@ -203,6 +272,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
                   {selectedHexBase32}.hex.camp
                 </a>
               </div>
+              <div>CNAME: {selectedHexCNAME}</div>
               <div>
                 <button
                   onClick={() => {
