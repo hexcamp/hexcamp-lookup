@@ -1,7 +1,7 @@
 hexcamp-lookup
 ===
 
-* https://6l22glmvqj2a.hex.camp/
+* https://6l22glmvqj2a.test.hex.camp/
 
 # License
 
