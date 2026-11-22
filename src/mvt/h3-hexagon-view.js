@@ -18,6 +18,9 @@ import hexToUrl from './hex-to-url'
 import tokens from '../tokens.json'
 import IconClusterLayer from './icon-cluster-layer'
 
+import { Map } from 'react-map-gl/maplibre'
+import 'maplibre-gl/dist/maplibre-gl.css'
+
 // Set your mapbox token here
 // const MAPBOX_TOKEN = localStorage.getItem('mapbox_token')
 const MAPBOX_TOKEN = tokens.mapbox
@@ -174,6 +177,7 @@ export default class H3HexagonView extends Component {
       }
     })
 
+    /*
     const mvtLayer = new MVTLayer({
       data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_TOKEN}`,
       // data: `http://localhost:5000/satellite-lowres/{z}/{x}/{y}.pbf`,
@@ -196,6 +200,7 @@ export default class H3HexagonView extends Component {
       getLineWidth: 1,
       lineWidthMinPixels: 1
     })
+    */
 
     const hexLayer = new H3HexagonLayer({
       id: 'h3-hexagon-layer-solid',
@@ -210,7 +215,7 @@ export default class H3HexagonView extends Component {
       elevationScale: zoom ? 5.0 + 30.0 * (10.0 / zoom) : 5,
       getHexagon: d => d.hex,
       // getFillColor: d => {
-      getLineWidth: 3,
+      getLineWidth: 0,
       getFillColor: d => {
         if (
           selectedHex &&
@@ -266,7 +271,8 @@ export default class H3HexagonView extends Component {
     })
 
     // return [mvtLayer, hexLayer, iconLayer]
-    return [mvtLayer, hexLayer, iconClusterLayer]
+    // return [mvtLayer, hexLayer, iconClusterLayer]
+    return [hexLayer, iconClusterLayer]
   }
 
   _updateViewState (viewState) {
@@ -305,6 +311,8 @@ export default class H3HexagonView extends Component {
           }}
           getCursor={({ isHovering }) => (isHovering ? 'pointer' : 'grab')}
         >
+          <Map mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" />
+
           {({ viewState }) => (
             <UpdateViewState
               updateViewState={this.updateViewState}
