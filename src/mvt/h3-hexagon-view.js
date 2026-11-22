@@ -10,7 +10,7 @@ import { color as d3Color } from 'd3-color'
 import throttle from 'lodash.throttle'
 import { IconLayer } from '@deck.gl/layers'
 import { H3HexagonLayer, MVTLayer } from '@deck.gl/geo-layers'
-import { h3ToGeo, h3ToGeoBoundary } from 'h3-js'
+import { cellToLatLng, cellToBoundary } from 'h3-js'
 import produce from 'immer'
 import DeckGL from '@deck.gl/react'
 import { FlyToInterpolator } from '@deck.gl/core'
@@ -115,7 +115,7 @@ export default class H3HexagonView extends Component {
       id: 'icon-cluster',
       data: dataSolid,
       getPosition: d => {
-        const latLng = h3ToGeo(d.hex)
+        const latLng = cellToLatLng(d.hex)
         return [latLng[1], latLng[0]]
       },
       sizeScale: 40,
@@ -139,7 +139,7 @@ export default class H3HexagonView extends Component {
         if (hexes.length > 0) {
           let points = []
           for (const hex of hexes) {
-            const hexBoundary = h3ToGeoBoundary(hex)
+            const hexBoundary = cellToBoundary(hex)
             points = points.concat(hexBoundary)
           }
 

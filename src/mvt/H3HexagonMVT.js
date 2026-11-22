@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useMemo } from "react";
 import { FlyToInterpolator } from "@deck.gl/core";
-import { geoToH3, h3GetBaseCell, h3GetResolution, h3IndexToSplitLong } from "h3-js";
+import { latLngToCell, getBaseCellNumber, getResolution, h3IndexToSplitLong } from "h3-js";
 import produce from "immer";
 import { useLocation } from "react-router-dom";
 import hexToUrl from "./hex-to-url";
@@ -41,7 +41,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
   const selectedHexH3BaseCell = useMemo(
     () => {
       if (!selectedHex) return null
-      return h3GetBaseCell(selectedHex[1])
+      return getBaseCellNumber(selectedHex[1])
     },
     [selectedHex]
   );
@@ -49,7 +49,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
   const selectedHexH3Resolution = useMemo(
     () => {
       if (!selectedHex) return null
-      return h3GetResolution(selectedHex[1])
+      return getResolution(selectedHex[1])
     },
     [selectedHex]
   );
@@ -153,7 +153,7 @@ export default function H3HexagonMVT({ homeLinkCounter }) {
   }
 
   function pushLatLng(lat, lng) {
-    const hex = geoToH3(lat, lng, resolution);
+    const hex = latLngToCell(lat, lng, resolution);
     const colorIndex = nextColor % 10;
     const newDataPoint = {
       hex,
