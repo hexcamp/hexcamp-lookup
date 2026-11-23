@@ -1,0 +1,55 @@
+name: Build and Deploy to IPFS Cluster
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-deploy-ipfs-cluster:
+    runs-on: ubuntu-latest
+    outputs: # This exposes the CID output of the action to the rest of the workflow
+      cid: ${{ steps.deploy.outputs.cid }}
+    steps:
+      - name: Fix MTU Network Issue
+        run: sudo ifconfig eth0 mtu 1400
+
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts
+          package-manager-cache: false
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: mkdir -p site
+
+      - run: mv -f build site/6l22glmvqj2a-hexcamp-lookup
+
+      - name: List dirs
+        run: ls -ld site/*
+
+      - name: List hexcamp-lookup subdir
+        run: ls -ld site/6l22glmvqj2a-hexcamp-lookup/*
+#
+#      - uses: ipfs/ipfs-deploy-action@v3.0.0
+#        name: Deploy to IPFS Cluster
+#        id: deploy
+#        with:
+#          path-to-deploy: site
+#          cluster-url: ${{ secrets.CLUSTER_URL }}
+#          cluster-user: ${{ secrets.CLUSTER_USER }}
+#          cluster-password: ${{ secrets.CLUSTER_PASSWORD }}
+#          github-token: ${{ github.token }}
+#
+#      - name: Call hackmd-updater API with CID
+#        run: curl -X POST -u admin:${{ secrets.HACKMD_UPDATER_PASSWORD }} https://6kgv3nw3nw2q.seahex.org/publish/${{ steps.deploy.outputs.cid }}
